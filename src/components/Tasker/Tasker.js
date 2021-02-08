@@ -1,6 +1,6 @@
 
 import React, { useReducer, useEffect } from "react";
-import app from '../../firebase'
+import {db} from "../../firebase"
 
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
@@ -47,8 +47,7 @@ function newTask(name, notes) {
 }
 
 function Tasker() {
-  useEffect(() => {});
-
+  //STYLING/////////////////////////////////
   const useStyles = makeStyles({
     root: {
       paddingTop: "1rem",
@@ -58,13 +57,29 @@ function Tasker() {
       position: "relative",
     },
   });
-
   const classes = useStyles();
+
+
+
+//SET STATES /////////////////////
+const [tasks, dispatch] = useReducer(reducer, []);
+
+
+////////////////////////////////////////////
+  
+
+  useEffect(() => {
+    console.log(tasks)
+    addToFirebase(tasks)
+  },[tasks]);
+
+
 
 
   //FIREBASE/////////////////////////////
   const addToFirebase = (tasks) => {
-    app.database().ref().child('task').set(
+    console.log('addToFirebase initialized')
+    db.child('task').set(
       tasks,
       err => {
         if(err)
@@ -74,8 +89,7 @@ function Tasker() {
   }
 
 
-  //SET STATES /////////////////////
-  const [tasks, dispatch] = useReducer(reducer, []);
+  
 
   //MODAL CONTROLS/////////////////////
   const [showModal, setShowModal] = React.useState(false);
@@ -131,7 +145,7 @@ function Tasker() {
         notes: taskNotes,
       },
     });
-    addToFirebase(tasks)
+    
     hideModalHandler();
   };
 
