@@ -10,13 +10,15 @@ import Task from "../Task/Task";
 import BottomNav from "../UI/BottomNav/BottomNav";
 import AddTaskModal from "../UI/AddTaskModal/AddTaskModal";
 import SettingsModal from '../UI/SettingsModal/SettingsModal';
+import { Dvr } from "@material-ui/icons";
 
 
 function reducer(tasks, action) {
   switch (action.type) {
     case "ADD_TASK":
       return [...tasks, newTask(action.payload.name, action.payload.notes)];
-
+    case "SET_STATE":
+      return [action.payload.tasks]
     case "SAVE_EDITED_TASK":
       return tasks.map((task) => {
         if (task.id === action.payload.id) {
@@ -66,7 +68,9 @@ const [tasks, dispatch] = useReducer(reducer, []);
 
 
 ////////////////////////////////////////////
-  
+useEffect(() =>{
+  //getFromFirebase()
+},[])
 
   useEffect(() => {
     console.log(tasks)
@@ -79,7 +83,7 @@ const [tasks, dispatch] = useReducer(reducer, []);
   //FIREBASE/////////////////////////////
   const addToFirebase = (tasks) => {
     console.log('addToFirebase initialized')
-    db.child('task').set(
+    db.ref().set(
       tasks,
       err => {
         if(err)
@@ -88,7 +92,20 @@ const [tasks, dispatch] = useReducer(reducer, []);
     )
   }
 
-
+const getFromFirebase = () => {
+  db.ref('task/0').on('value', querySnapShot => {
+    let data = querySnapShot.val() ? querySnapShot.val() : {};
+    let taskerItems = {...data}
+    dispatch({
+      type: "SET_STATE",
+      payload: {
+        tasks: taskerItems,
+       
+      },
+    });
+    console.log(taskerItems)
+  })
+}
   
 
   //MODAL CONTROLS/////////////////////
