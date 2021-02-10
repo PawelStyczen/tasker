@@ -1,6 +1,5 @@
-
 import React, { useReducer, useEffect } from "react";
-import {db} from "../../firebase"
+import { db } from "../../firebase";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
@@ -9,16 +8,17 @@ import Task from "../Task/Task";
 
 import BottomNav from "../UI/BottomNav/BottomNav";
 import AddTaskModal from "../UI/AddTaskModal/AddTaskModal";
-import SettingsModal from '../UI/SettingsModal/SettingsModal';
-import { Dvr } from "@material-ui/icons";
-
+import SettingsModal from "../UI/SettingsModal/SettingsModal";
+import { CallToActionSharp, Dvr } from "@material-ui/icons";
 
 function reducer(tasks, action) {
   switch (action.type) {
     case "ADD_TASK":
       return [...tasks, newTask(action.payload.name, action.payload.notes)];
-    case "SET_STATE":
-      return [action.payload.tasks]
+    case "GET_FROM_FIREBASE":
+      return [...tasks, {...action.payload.task}]
+      // tasks: [action.payload.task, ...tasks]
+      
     case "SAVE_EDITED_TASK":
       return tasks.map((task) => {
         if (task.id === action.payload.id) {
@@ -61,60 +61,55 @@ function Tasker() {
   });
   const classes = useStyles();
 
-
-
-//SET STATES /////////////////////
-const [tasks, dispatch] = useReducer(reducer, []);
-
-
-////////////////////////////////////////////
-useEffect(() =>{
-  //getFromFirebase()
-},[])
+  //SET STATES /////////////////////
+  const [tasks, dispatch] = useReducer(reducer, []);
+  const [firebaseDbInitialized, setFirebaseDbInitialized] = React.useState(false);
+  ////////////////////////////////////////////
+  useEffect(() => {
+    getFromFirebase();
+  }, []);
 
   useEffect(() => {
-    console.log(tasks)
-    addToFirebase(tasks)
-  },[tasks]);
-
-
-
+    console.log(tasks);
+    if(firebaseDbInitialized){
+      addToFirebase(tasks)
+    }
+    
+  }, [tasks]);
 
   //FIREBASE/////////////////////////////
   const addToFirebase = (tasks) => {
-    console.log('addToFirebase initialized')
-    db.ref().set(
-      tasks,
-      err => {
-        if(err)
-        console.log(err)
-      }
-    )
-  }
-
-const getFromFirebase = () => {
-  db.ref('task/0').on('value', querySnapShot => {
-    let data = querySnapShot.val() ? querySnapShot.val() : {};
-    let taskerItems = {...data}
-    dispatch({
-      type: "SET_STATE",
-      payload: {
-        tasks: taskerItems,
-       
-      },
+    console.log("addToFirebase initialized");
+    db.ref().set(tasks, (err) => {
+      if (err) console.log(err);
     });
-    console.log(taskerItems)
-  })
-}
-  
+  };
+
+  const getFromFirebase = () => {
+    
+    var query = db.ref().orderByKey();
+    query.once("value").then(function (snapshot) {
+      snapshot.forEach(function (childSnapshot) {
+       
+        // childData will be the actual contents of the child
+        var childData = childSnapshot.val();
+        console.log(childData)
+        dispatch({
+          type: "GET_FROM_FIREBASE",
+          payload: {
+              task: childData
+          },
+        });
+      });
+    });
+    setFirebaseDbInitialized(true)
+  };
 
   //MODAL CONTROLS/////////////////////
   const [showModal, setShowModal] = React.useState(false);
   const [showSettings, setShowSettings] = React.useState(false);
   const [editingTask, setEditingTask] = React.useState(false);
-  
-  
-  
+
   const showAddTaskModalHandler = (editing) => {
     if (editing === "EDIT_TASK") {
       setEditingTask(true);
@@ -127,7 +122,7 @@ const getFromFirebase = () => {
 
   const showSettingsModalHandler = () => {
     setShowSettings(true);
-  }
+  };
 
   const hideModalHandler = () => {
     setShowModal(false);
@@ -162,7 +157,7 @@ const getFromFirebase = () => {
         notes: taskNotes,
       },
     });
-    
+
     hideModalHandler();
   };
 
@@ -210,9 +205,9 @@ const getFromFirebase = () => {
         return tasks.filter((task) => task.completed);
       case "SHOW_PENDING":
         return tasks.filter((task) => !task.completed);
-      
-      default :
-      return tasks;
+
+      default:
+        return tasks;
     }
   };
 
@@ -249,12 +244,15 @@ const getFromFirebase = () => {
           title={editingTask ? "Edit Task" : "Add Task"}
         />
         <SettingsModal
-         show={showSettings}
-         hide={hideModalHandler}
-         ></SettingsModal>
+          show={showSettings}
+          hide={hideModalHandler}
+        ></SettingsModal>
       </Container>
 
-      <BottomNav showAddTaskModal={showAddTaskModalHandler} showSettingsModal={showSettingsModalHandler}/>
+      <BottomNav
+        showAddTaskModal={showAddTaskModalHandler}
+        showSettingsModal={showSettingsModalHandler}
+      />
     </React.Fragment>
   );
 }
