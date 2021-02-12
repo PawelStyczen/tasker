@@ -1,5 +1,6 @@
 import React, { useReducer, useEffect } from "react";
 import { db } from "../../firebase";
+import {useAuth} from '../../contexts/AuthContext'
 
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
@@ -9,7 +10,7 @@ import Task from "../Task/Task";
 import BottomNav from "../UI/BottomNav/BottomNav";
 import AddTaskModal from "../UI/AddTaskModal/AddTaskModal";
 import SettingsModal from "../UI/SettingsModal/SettingsModal";
-import { CallToActionSharp, Dvr } from "@material-ui/icons";
+
 
 function reducer(tasks, action) {
   switch (action.type) {
@@ -61,10 +62,14 @@ function Tasker() {
   });
   const classes = useStyles();
 
+
   //SET STATES /////////////////////
   const [tasks, dispatch] = useReducer(reducer, []);
   const [firebaseDbInitialized, setFirebaseDbInitialized] = React.useState(false);
+  const {currentUser} = useAuth();
   ////////////////////////////////////////////
+
+
   useEffect(() => {
     getFromFirebase();
   }, []);
@@ -80,14 +85,15 @@ function Tasker() {
   //FIREBASE/////////////////////////////
   const addToFirebase = (tasks) => {
     console.log("addToFirebase initialized");
-    db.ref().set(tasks, (err) => {
+    console.log(currentUser.uid)
+    db.ref(currentUser.uid).set(tasks, (err) => {
       if (err) console.log(err);
     });
   };
 
   const getFromFirebase = () => {
     
-    var query = db.ref().orderByKey();
+    var query = db.ref(currentUser.uid).orderByKey();
     query.once("value").then(function (snapshot) {
       snapshot.forEach(function (childSnapshot) {
        
@@ -106,6 +112,7 @@ function Tasker() {
   };
 
   //MODAL CONTROLS/////////////////////
+  const [taskFilter, setTaskFilter] = React.useState("SHOW_PENDING");
   const [showModal, setShowModal] = React.useState(false);
   const [showSettings, setShowSettings] = React.useState(false);
   const [editingTask, setEditingTask] = React.useState(false);
@@ -197,8 +204,8 @@ function Tasker() {
   };
 
   ////////FILTER LOGIC///////////////////////////
-  const getVisibleTasks = (tasks, filter) => {
-    switch (filter) {
+  const getVisibleTasks = (tasks) => {
+    switch (taskFilter) {
       case "SHOW_ALL":
         return tasks;
       case "SHOW_COMPLETED":
@@ -252,6 +259,7 @@ function Tasker() {
       <BottomNav
         showAddTaskModal={showAddTaskModalHandler}
         showSettingsModal={showSettingsModalHandler}
+        changeFilter={setTaskFilter}
       />
     </React.Fragment>
   );

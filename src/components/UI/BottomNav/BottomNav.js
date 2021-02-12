@@ -1,45 +1,70 @@
-import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import BottomNavigation from '@material-ui/core/BottomNavigation';
-import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
-import RestoreIcon from '@material-ui/icons/Restore';
+import React from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import BottomNavigation from "@material-ui/core/BottomNavigation";
+import BottomNavigationAction from "@material-ui/core/BottomNavigationAction";
+import RestoreIcon from "@material-ui/icons/Restore";
 
-import { AddCircle, Settings } from '@material-ui/icons';
+import { AddCircle, Settings } from "@material-ui/icons";
+
+import Button from "@material-ui/core/Button";
+import Menu from "@material-ui/core/Menu";
+import MenuItem from "@material-ui/core/MenuItem";
 
 const useStyles = makeStyles({
-    root: {
-      
-      position : 'sticky',
-      bottom : '0',
-      
-      
-    },
-  });
+  root: {
+    position: "sticky",
+    bottom: "0",
+  },
+});
 
- 
-  
-    export default function BottomNav({showAddTaskModal, showSettingsModal}) {
-      // button styles/////
-        const classes = useStyles();
-        const [value, setValue] = React.useState(0);
+export default function BottomNav({ showAddTaskModal, showSettingsModal, changeFilter }) {
+  // button styles/////
+  const classes = useStyles();
 
-   
-      
-        return (
-          <BottomNavigation
-            value={value}
-            onChange={(event, newValue) => {
-              setValue(newValue);
-            }}
-            showLabels
-            className={classes.root}
-          >
-            <BottomNavigationAction label="Recents" icon={<RestoreIcon />} />
-            <BottomNavigationAction label="Add" icon={<AddCircle />} onClick={() => {showAddTaskModal("ADD_TASK")}} />
-            <BottomNavigationAction label="Settings" icon={<Settings />} onClick={showSettingsModal} />
-          </BottomNavigation>
-        );
-      }
-  
+  // STATES /////////////////////
+  const [anchorEl, setAnchorEl] = React.useState(null);
 
+  //MENU HANDLING/////////////////////
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
 
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
+
+  ///////////////////////////
+  return (
+    <BottomNavigation showLabels className={classes.root}>
+      <BottomNavigationAction
+        label="Sort"
+        icon={<RestoreIcon />}
+        onClick={handleOpenMenu}
+      />
+      <BottomNavigationAction
+        label="Add"
+        icon={<AddCircle />}
+        onClick={() => {
+          showAddTaskModal("ADD_TASK");
+        }}
+      />
+      <BottomNavigationAction
+        label="Settings"
+        icon={<Settings />}
+        onClick={showSettingsModal}
+      />
+
+      <Menu
+        id="simple-menu"
+        anchorEl={anchorEl}
+        keepMounted
+        open={Boolean(anchorEl)}
+        onClose={handleCloseMenu}
+      >
+        <MenuItem onClick={handleCloseMenu}>Pending</MenuItem>
+        <MenuItem onClick={handleCloseMenu}>Completed</MenuItem>
+        <MenuItem onClick={handleCloseMenu}>Important</MenuItem>
+      </Menu>
+    </BottomNavigation>
+  );
+}
