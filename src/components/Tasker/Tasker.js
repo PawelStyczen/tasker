@@ -45,6 +45,15 @@ function reducer(tasks, action) {
   }
 }
 
+function filterTaskReducer(filteredTasks, action) {
+  switch (action.type) {
+    case "SHOW_ALL":
+      return [ ...action.payload.tasks]
+    case "SHOW_COMPLETED":
+      return [ ...action.payload.tasks.filter(task => task.completed)]
+  }
+}
+
 function newTask(name, notes) {
   return { id: Date.now(), name: name, completed: false, notes: notes };
 }
@@ -65,6 +74,7 @@ function Tasker() {
 
   //SET STATES /////////////////////
   const [tasks, dispatch] = useReducer(reducer, []);
+  const [filteredTasks, filter] = useReducer(filterTaskReducer, []);
   const [firebaseDbInitialized, setFirebaseDbInitialized] = React.useState(false);
   const {currentUser} = useAuth();
   ////////////////////////////////////////////
@@ -72,12 +82,16 @@ function Tasker() {
 
   useEffect(() => {
     getFromFirebase();
+    
   }, []);
 
   useEffect(() => {
-    console.log(tasks);
+    console.log(tasks)
+    
+    console.log(filteredTasks);
     if(firebaseDbInitialized){
-      addToFirebase(tasks)
+      getVisibleTasks(tasks)
+      //addToFirebase(tasks)
     }
     
   }, [tasks]);
@@ -204,24 +218,37 @@ function Tasker() {
   };
 
   ////////FILTER LOGIC///////////////////////////
-  const getVisibleTasks = (tasks) => {
-    switch (taskFilter) {
-      case "SHOW_ALL":
-        return tasks;
-      case "SHOW_COMPLETED":
-        return tasks.filter((task) => task.completed);
-      case "SHOW_PENDING":
-        return tasks.filter((task) => !task.completed);
+  const getVisibleTasks = (tasks, type) => {
+    
+    filter({
+      type: "SHOW_COMPLETED",
+      payload: {
+        tasks: tasks
+      }
+    })
+    // switch (taskFilter) {
+    //   case "SHOW_ALL":
+    //     return tasks;
+    //   case "SHOW_COMPLETED":
+    //     return tasks.filter((task) => task.completed);
+    //   case "SHOW_PENDING":
+    //     return tasks.filter((task) => !task.completed);
 
-      default:
-        return tasks;
-    }
+    //   default:
+    //     return tasks;
+    // }
   };
 
+
+  const handleTaskFilterChange = (newFilter) =>{
+    setTaskFilter(newFilter)
+  }
+
+////////////////////////////////////////////////////
   return (
     <React.Fragment>
       <Container className={classes.root} maxWidth="md">
-        {getVisibleTasks(tasks, "SHOW_PENDING").map((task) => {
+        {firebaseDbInitialized ? filteredTasks.map((task) => {
           return (
             <Task
               key={task.id}
@@ -238,7 +265,8 @@ function Tasker() {
               task={task}
             />
           );
-        })}
+        }) : null} 
+       
 
         <AddTaskModal
           show={showModal}
@@ -259,7 +287,7 @@ function Tasker() {
       <BottomNav
         showAddTaskModal={showAddTaskModalHandler}
         showSettingsModal={showSettingsModalHandler}
-        changeFilter={setTaskFilter}
+        
       />
     </React.Fragment>
   );
