@@ -1,6 +1,6 @@
 import React, { useReducer, useEffect } from "react";
 import { db } from "../../firebase";
-import {useAuth} from '../../contexts/AuthContext'
+import { useAuth } from "../../contexts/AuthContext";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
@@ -11,15 +11,14 @@ import BottomNav from "../UI/BottomNav/BottomNav";
 import AddTaskModal from "../UI/AddTaskModal/AddTaskModal";
 import SettingsModal from "../UI/SettingsModal/SettingsModal";
 
-
 function reducer(tasks, action) {
   switch (action.type) {
     case "ADD_TASK":
       return [...tasks, newTask(action.payload.name, action.payload.notes)];
     case "GET_FROM_FIREBASE":
-      return [...tasks, {...action.payload.task}]
-      // tasks: [action.payload.task, ...tasks]
-      
+      return [...tasks, { ...action.payload.task }];
+    // tasks: [action.payload.task, ...tasks]
+
     case "SAVE_EDITED_TASK":
       return tasks.map((task) => {
         if (task.id === action.payload.id) {
@@ -48,15 +47,19 @@ function reducer(tasks, action) {
 function filterTaskReducer(filteredTasks, action) {
   switch (action.type) {
     case "SHOW_ALL":
-      return [ ...action.payload.tasks]
+      return [...action.payload.tasks];
     case "SHOW_COMPLETED":
-      return [ ...action.payload.tasks.filter(task => task.completed)]
+      return [...action.payload.tasks.filter((task) => task.completed)];
+    case "SHOW_PENDING":
+      return [...action.payload.tasks.filter((task) => !task.completed)];
   }
 }
 
 function newTask(name, notes) {
   return { id: Date.now(), name: name, completed: false, notes: notes };
 }
+
+export const FilterDispatchContext = React.createContext(null);
 
 function Tasker() {
   //STYLING/////////////////////////////////
@@ -71,62 +74,69 @@ function Tasker() {
   });
   const classes = useStyles();
 
-
   //SET STATES /////////////////////
   const [tasks, dispatch] = useReducer(reducer, []);
   const [filteredTasks, filter] = useReducer(filterTaskReducer, []);
-  const [firebaseDbInitialized, setFirebaseDbInitialized] = React.useState(false);
-  const {currentUser} = useAuth();
-  ////////////////////////////////////////////
 
+  const [firebaseDbInitialized, setFirebaseDbInitialized] = React.useState(
+    false
+  );
+  const { currentUser } = useAuth();
+  ////////////////////////////////////////////
 
   useEffect(() => {
     getFromFirebase();
-    
   }, []);
 
   useEffect(() => {
-    console.log(tasks)
-    
+    console.log(tasks);
+
     console.log(filteredTasks);
-    if(firebaseDbInitialized){
-      getVisibleTasks(tasks)
+    if (firebaseDbInitialized) {
       //addToFirebase(tasks)
     }
-    
   }, [tasks]);
+
+
+
+
+  
+  const [taskFilter, setTaskFilter] = React.useState("SHOW_ALL");
+  useEffect(() => {
+    if (firebaseDbInitialized) {
+      getVisibleTasks(tasks, taskFilter);
+    }
+  },[tasks, taskFilter]);
 
   //FIREBASE/////////////////////////////
   const addToFirebase = (tasks) => {
     console.log("addToFirebase initialized");
-    console.log(currentUser.uid)
+    console.log(currentUser.uid);
     db.ref(currentUser.uid).set(tasks, (err) => {
       if (err) console.log(err);
     });
   };
 
   const getFromFirebase = () => {
-    
     var query = db.ref(currentUser.uid).orderByKey();
     query.once("value").then(function (snapshot) {
       snapshot.forEach(function (childSnapshot) {
-       
         // childData will be the actual contents of the child
         var childData = childSnapshot.val();
-        console.log(childData)
+        console.log(childData);
         dispatch({
           type: "GET_FROM_FIREBASE",
           payload: {
-              task: childData
+            task: childData,
           },
         });
       });
     });
-    setFirebaseDbInitialized(true)
+    setFirebaseDbInitialized(true);
   };
 
   //MODAL CONTROLS/////////////////////
-  const [taskFilter, setTaskFilter] = React.useState("SHOW_PENDING");
+
   const [showModal, setShowModal] = React.useState(false);
   const [showSettings, setShowSettings] = React.useState(false);
   const [editingTask, setEditingTask] = React.useState(false);
@@ -219,77 +229,69 @@ function Tasker() {
 
   ////////FILTER LOGIC///////////////////////////
   const getVisibleTasks = (tasks, type) => {
-    
     filter({
-      type: "SHOW_COMPLETED",
+      type: type,
       payload: {
-        tasks: tasks
-      }
-    })
-    // switch (taskFilter) {
-    //   case "SHOW_ALL":
-    //     return tasks;
-    //   case "SHOW_COMPLETED":
-    //     return tasks.filter((task) => task.completed);
-    //   case "SHOW_PENDING":
-    //     return tasks.filter((task) => !task.completed);
-
-    //   default:
-    //     return tasks;
-    // }
+        tasks: tasks,
+      },
+    });
   };
 
 
-  const handleTaskFilterChange = (newFilter) =>{
-    setTaskFilter(newFilter)
-  }
+  const taskFilterChangeHandler = (newFilter) => {
+    setTaskFilter(newFilter);
+    console.log(taskFilter)
+  };
 
-////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////
   return (
-    <React.Fragment>
-      <Container className={classes.root} maxWidth="md">
-        {firebaseDbInitialized ? filteredTasks.map((task) => {
-          return (
-            <Task
-              key={task.id}
-              id={task.id}
-              taskNotes={task.notes}
-              taskTekst={task.name}
-              deleteTask={deleteTaskHandler}
-              completeTask={completeTaskHandler}
-              editTask={editTaskHandler}
-              saveEditedTask={saveEditedTaskHandler}
-              showEditModal={() => {
-                showAddTaskModalHandler("EDIT_TASK");
-              }}
-              task={task}
-            />
-          );
-        }) : null} 
-       
+   
+      <React.Fragment>
+        <Container className={classes.root} maxWidth="md">
+          {firebaseDbInitialized
+            ? filteredTasks.map((task) => {
+                return (
+                  <Task
+                    key={task.id}
+                    id={task.id}
+                    taskNotes={task.notes}
+                    taskTekst={task.name}
+                    deleteTask={deleteTaskHandler}
+                    completeTask={completeTaskHandler}
+                    editTask={editTaskHandler}
+                    saveEditedTask={saveEditedTaskHandler}
+                    showEditModal={() => {
+                      showAddTaskModalHandler("EDIT_TASK");
+                    }}
+                    task={task}
+                  />
+                );
+              })
+            : null}
 
-        <AddTaskModal
-          show={showModal}
-          hide={hideModalHandler}
-          setTaskName={handleTaskInput}
-          setTaskNotes={handleNotesInput}
-          taskName={editingTask ? taskName : null}
-          taskNotes={editingTask ? taskNotes : null}
-          saveTask={editingTask ? saveEditedTaskHandler : addTaskHandler}
-          title={editingTask ? "Edit Task" : "Add Task"}
+          <AddTaskModal
+            show={showModal}
+            hide={hideModalHandler}
+            setTaskName={handleTaskInput}
+            setTaskNotes={handleNotesInput}
+            taskName={editingTask ? taskName : null}
+            taskNotes={editingTask ? taskNotes : null}
+            saveTask={editingTask ? saveEditedTaskHandler : addTaskHandler}
+            title={editingTask ? "Edit Task" : "Add Task"}
+          />
+          <SettingsModal
+            show={showSettings}
+            hide={hideModalHandler}
+          ></SettingsModal>
+        </Container>
+
+        <BottomNav
+          showAddTaskModal={showAddTaskModalHandler}
+          showSettingsModal={showSettingsModalHandler}
+          taskFilterChange={taskFilterChangeHandler}
         />
-        <SettingsModal
-          show={showSettings}
-          hide={hideModalHandler}
-        ></SettingsModal>
-      </Container>
-
-      <BottomNav
-        showAddTaskModal={showAddTaskModalHandler}
-        showSettingsModal={showSettingsModalHandler}
-        
-      />
-    </React.Fragment>
+      </React.Fragment>
+   
   );
 }
 

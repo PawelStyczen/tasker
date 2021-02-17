@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import Card from "@material-ui/core/Card";
 import CardActions from "@material-ui/core/CardActions";
 
@@ -54,6 +54,10 @@ const handleEditing = (id) => {
 
 }
 
+useEffect(() => {
+  console.log(task.completed)
+  setChecked(task.completed)
+}, )
 
 
   return (
@@ -61,7 +65,7 @@ const handleEditing = (id) => {
       variant="outlined"
       key={id}
       className={
-        checked ? `${classes.root} ${classes.taskCompleted}` : classes.root
+        task.completed ? `${classes.root} ${classes.taskCompleted}` : classes.root
       }
     >
       <CardActions>
@@ -73,7 +77,7 @@ const handleEditing = (id) => {
         <Typography
           variant="body1"
           className={
-            checked ? classes.taskTextChecked : classes.taskTextUnchecked
+            task.completed ? classes.taskTextChecked : classes.taskTextUnchecked
           }
         >
           <strong>{taskTekst}</strong>

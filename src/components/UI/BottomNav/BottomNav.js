@@ -1,4 +1,5 @@
-import React from "react";
+import React, {useContext} from "react";
+import {FilterDispatchContext} from "../../Tasker/Tasker"
 import { makeStyles } from "@material-ui/core/styles";
 import BottomNavigation from "@material-ui/core/BottomNavigation";
 import BottomNavigationAction from "@material-ui/core/BottomNavigationAction";
@@ -17,9 +18,14 @@ const useStyles = makeStyles({
   },
 });
 
-export default function BottomNav({ showAddTaskModal, showSettingsModal, changeFilter }) {
-  // button styles/////
+export default function BottomNav({ showAddTaskModal, showSettingsModal, taskFilterChange }) {
+  // button styles////
   const classes = useStyles();
+
+
+  // CONTEXT////////////////////////
+  const filter = useContext(FilterDispatchContext);
+
 
   // STATES /////////////////////
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -61,8 +67,8 @@ export default function BottomNav({ showAddTaskModal, showSettingsModal, changeF
         open={Boolean(anchorEl)}
         onClose={handleCloseMenu}
       >
-        <MenuItem onClick={handleCloseMenu}>Pending</MenuItem>
-        <MenuItem onClick={handleCloseMenu}>Completed</MenuItem>
+        <MenuItem onClick={() => {taskFilterChange("SHOW_PENDING"); handleCloseMenu()} }>Pending</MenuItem>
+        <MenuItem onClick={() => {taskFilterChange("SHOW_COMPLETED"); handleCloseMenu()} }>Completed</MenuItem>
         <MenuItem onClick={handleCloseMenu}>Important</MenuItem>
       </Menu>
     </BottomNavigation>
