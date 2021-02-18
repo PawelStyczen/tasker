@@ -44,6 +44,12 @@ function reducer(tasks, action) {
   }
 }
 
+function newTask(name, notes) {
+  return { id: Date.now(), name: name, completed: false, notes: notes };
+}
+
+
+
 function filterTaskReducer(filteredTasks, action) {
   switch (action.type) {
     case "SHOW_ALL":
@@ -55,11 +61,9 @@ function filterTaskReducer(filteredTasks, action) {
   }
 }
 
-function newTask(name, notes) {
-  return { id: Date.now(), name: name, completed: false, notes: notes };
-}
 
-export const FilterDispatchContext = React.createContext(null);
+
+
 
 
 
@@ -143,7 +147,7 @@ function Tasker() {
 
   useEffect(() => {
     if (firebaseDbInitialized) {
-      //addToFirebase(tasks)
+      addToFirebase(tasks)
     }
   }, [tasks]);
 

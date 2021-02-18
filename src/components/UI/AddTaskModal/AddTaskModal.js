@@ -11,7 +11,11 @@ import CloseIcon from "@material-ui/icons/Close";
 import Slide from "@material-ui/core/Slide";
 import TextField from "@material-ui/core/TextField";
 
-
+import Checkbox from "@material-ui/core/Checkbox";
+import CheckBoxIcon from "@material-ui/icons/CheckBox";
+import StarBorderIcon from '@material-ui/icons/StarBorder';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import StarIcon from '@material-ui/icons/Star';
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
@@ -37,13 +41,29 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function AddTaskModal({title, show, hide, setTaskName, setTaskNotes, taskName, taskNotes, saveTask}) {
+export default function AddTaskModal({
+  title,
+  show,
+  hide,
+  setTaskName,
+  setTaskNotes,
+  taskName,
+  taskNotes,
+  saveTask,
+}) {
+  //MODAL CONTROLS/////////
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
 
   useEffect(() => {
     setOpen(show);
   }, [show]);
+
+  //CHECKBOX CONTROLS//////
+  const [important, setImportant] = React.useState(false);
+  const handleChange = (event) => {
+    setImportant(!important);
+  };
 
   return (
     <div>
@@ -72,7 +92,24 @@ export default function AddTaskModal({title, show, hide, setTaskName, setTaskNot
           </Toolbar>
         </AppBar>
         <form className={classes.form} noValidate autoComplete="off">
-          <TextField id="standard-basic" label="Task" onChange={setTaskName} value={taskName}/>
+          <TextField
+            id="standard-basic"
+            label="Task"
+            onChange={setTaskName}
+            value={taskName}
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                icon={<StarBorderIcon />}
+                checkedIcon={<StarIcon />}
+                onChange={handleChange}
+                name="important"
+                color="primary"
+              />
+            }
+            label="Important"
+          />
           <TextField
             id="filled-textarea"
             label="Notes"
