@@ -61,8 +61,10 @@ function newTask(name, notes) {
 
 export const FilterDispatchContext = React.createContext(null);
 
+
+
 function Tasker() {
-  //STYLING/////////////////////////////////
+  //STYLING/////////////////////////////////////////////////////////////////////////////////////////////////
   const useStyles = makeStyles({
     root: {
       paddingTop: "1rem",
@@ -74,110 +76,16 @@ function Tasker() {
   });
   const classes = useStyles();
 
-  //SET STATES /////////////////////
-  const [tasks, dispatch] = useReducer(reducer, []);
-  const [filteredTasks, filter] = useReducer(filterTaskReducer, []);
 
+
+  //TASK HANDLING////////////////////////////////////////////////////////////////////////////////////////////////
+  //main task state
+  const [tasks, dispatch] = useReducer(reducer, []);
+  //check if firebase was initialized
   const [firebaseDbInitialized, setFirebaseDbInitialized] = React.useState(
     false
   );
   const { currentUser } = useAuth();
-  ////////////////////////////////////////////
-
-  useEffect(() => {
-    getFromFirebase();
-  }, []);
-
-  useEffect(() => {
-    console.log(tasks);
-
-    console.log(filteredTasks);
-    if (firebaseDbInitialized) {
-      //addToFirebase(tasks)
-    }
-  }, [tasks]);
-
-
-
-
-  
-  const [taskFilter, setTaskFilter] = React.useState("SHOW_ALL");
-  useEffect(() => {
-    if (firebaseDbInitialized) {
-      getVisibleTasks(tasks, taskFilter);
-    }
-  },[tasks, taskFilter]);
-
-  //FIREBASE/////////////////////////////
-  const addToFirebase = (tasks) => {
-    console.log("addToFirebase initialized");
-    console.log(currentUser.uid);
-    db.ref(currentUser.uid).set(tasks, (err) => {
-      if (err) console.log(err);
-    });
-  };
-
-  const getFromFirebase = () => {
-    var query = db.ref(currentUser.uid).orderByKey();
-    query.once("value").then(function (snapshot) {
-      snapshot.forEach(function (childSnapshot) {
-        // childData will be the actual contents of the child
-        var childData = childSnapshot.val();
-        console.log(childData);
-        dispatch({
-          type: "GET_FROM_FIREBASE",
-          payload: {
-            task: childData,
-          },
-        });
-      });
-    });
-    setFirebaseDbInitialized(true);
-  };
-
-  //MODAL CONTROLS/////////////////////
-
-  const [showModal, setShowModal] = React.useState(false);
-  const [showSettings, setShowSettings] = React.useState(false);
-  const [editingTask, setEditingTask] = React.useState(false);
-
-  const showAddTaskModalHandler = (editing) => {
-    if (editing === "EDIT_TASK") {
-      setEditingTask(true);
-      setShowModal(true);
-    } else {
-      setEditingTask(false);
-      setShowModal(true);
-    }
-  };
-
-  const showSettingsModalHandler = () => {
-    setShowSettings(true);
-  };
-
-  const hideModalHandler = () => {
-    setShowModal(false);
-    setShowSettings(false);
-  };
-
-  //TASK INPUT CONTROLS///////////////////
-  const [taskName, setTaskName] = React.useState("");
-  const handleTaskInput = (val) => {
-    setTaskName(val.target.value);
-  };
-  const [taskNotes, setTaskNotes] = React.useState("");
-  const handleNotesInput = (val) => {
-    setTaskNotes(val.target.value);
-  };
-
-  //TASK EDIT INPUT CONTROLS///////////
-  const [editedTaskId, setEditedTaskId] = React.useState("");
-  const editTaskHandler = (id) => {
-    let editedTask = tasks.find((task) => task.id === id);
-    setTaskName(editedTask.name);
-    setTaskNotes(editedTask.notes);
-    setEditedTaskId(id);
-  };
 
   //ADD TASKS/////////////////////////////
   const addTaskHandler = () => {
@@ -227,7 +135,100 @@ function Tasker() {
     console.log(id);
   };
 
-  ////////FILTER LOGIC///////////////////////////
+  //FIREBASE///////////////////////////////////////////////////////////////////////////////////
+  
+  useEffect(() => {
+    getFromFirebase();
+  }, []);
+
+  useEffect(() => {
+    if (firebaseDbInitialized) {
+      //addToFirebase(tasks)
+    }
+  }, [tasks]);
+
+  const addToFirebase = (tasks) => {
+    console.log("addToFirebase initialized");
+    console.log(currentUser.uid);
+    db.ref(currentUser.uid).set(tasks, (err) => {
+      if (err) console.log(err);
+    });
+  };
+
+  const getFromFirebase = () => {
+    var query = db.ref(currentUser.uid).orderByKey();
+    query.once("value").then(function (snapshot) {
+      snapshot.forEach(function (childSnapshot) {
+        // childData will be the actual contents of the child
+        var childData = childSnapshot.val();
+        console.log(childData);
+        dispatch({
+          type: "GET_FROM_FIREBASE",
+          payload: {
+            task: childData,
+          },
+        });
+      });
+    });
+    setFirebaseDbInitialized(true);
+  };
+  
+
+  //MODAL CONTROLS///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  const [showModal, setShowModal] = React.useState(false);
+  const [showSettings, setShowSettings] = React.useState(false);
+  const [editingTask, setEditingTask] = React.useState(false);
+
+  const showAddTaskModalHandler = (editing) => {
+    if (editing === "EDIT_TASK") {
+      setEditingTask(true);
+      setShowModal(true);
+    } else {
+      setEditingTask(false);
+      setShowModal(true);
+    }
+  };
+
+  const showSettingsModalHandler = () => {
+    setShowSettings(true);
+  };
+
+  const hideModalHandler = () => {
+    setShowModal(false);
+    setShowSettings(false);
+  };
+
+  //TASK INPUT CONTROLS///////////////////
+  const [taskName, setTaskName] = React.useState("");
+  const handleTaskInput = (val) => {
+    setTaskName(val.target.value);
+  };
+  const [taskNotes, setTaskNotes] = React.useState("");
+  const handleNotesInput = (val) => {
+    setTaskNotes(val.target.value);
+  };
+
+  //TASK EDIT INPUT CONTROLS///////////
+  const [editedTaskId, setEditedTaskId] = React.useState("");
+  const editTaskHandler = (id) => {
+    let editedTask = tasks.find((task) => task.id === id);
+    setTaskName(editedTask.name);
+    setTaskNotes(editedTask.notes);
+    setEditedTaskId(id);
+  };
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+ 
+  // FILTER LOGIC ///////////////////////////////////////////////////////
+  const [filteredTasks, filter] = useReducer(filterTaskReducer, []);
+  const [taskFilter, setTaskFilter] = React.useState("SHOW_ALL");
+  useEffect(() => {
+    if (firebaseDbInitialized) {
+      getVisibleTasks(tasks, taskFilter);
+    }
+  }, [tasks, taskFilter]);
+
   const getVisibleTasks = (tasks, type) => {
     filter({
       type: type,
@@ -237,61 +238,58 @@ function Tasker() {
     });
   };
 
-
   const taskFilterChangeHandler = (newFilter) => {
     setTaskFilter(newFilter);
-    console.log(taskFilter)
+    
   };
 
   ////////////////////////////////////////////////////
   return (
-   
-      <React.Fragment>
-        <Container className={classes.root} maxWidth="md">
-          {firebaseDbInitialized
-            ? filteredTasks.map((task) => {
-                return (
-                  <Task
-                    key={task.id}
-                    id={task.id}
-                    taskNotes={task.notes}
-                    taskTekst={task.name}
-                    deleteTask={deleteTaskHandler}
-                    completeTask={completeTaskHandler}
-                    editTask={editTaskHandler}
-                    saveEditedTask={saveEditedTaskHandler}
-                    showEditModal={() => {
-                      showAddTaskModalHandler("EDIT_TASK");
-                    }}
-                    task={task}
-                  />
-                );
-              })
-            : null}
+    <React.Fragment>
+      <Container className={classes.root} maxWidth="md">
+        {firebaseDbInitialized
+          ? filteredTasks.map((task) => {
+              return (
+                <Task
+                  key={task.id}
+                  id={task.id}
+                  taskNotes={task.notes}
+                  taskTekst={task.name}
+                  deleteTask={deleteTaskHandler}
+                  completeTask={completeTaskHandler}
+                  editTask={editTaskHandler}
+                  saveEditedTask={saveEditedTaskHandler}
+                  showEditModal={() => {
+                    showAddTaskModalHandler("EDIT_TASK");
+                  }}
+                  task={task}
+                />
+              );
+            })
+          : null}
 
-          <AddTaskModal
-            show={showModal}
-            hide={hideModalHandler}
-            setTaskName={handleTaskInput}
-            setTaskNotes={handleNotesInput}
-            taskName={editingTask ? taskName : null}
-            taskNotes={editingTask ? taskNotes : null}
-            saveTask={editingTask ? saveEditedTaskHandler : addTaskHandler}
-            title={editingTask ? "Edit Task" : "Add Task"}
-          />
-          <SettingsModal
-            show={showSettings}
-            hide={hideModalHandler}
-          ></SettingsModal>
-        </Container>
-
-        <BottomNav
-          showAddTaskModal={showAddTaskModalHandler}
-          showSettingsModal={showSettingsModalHandler}
-          taskFilterChange={taskFilterChangeHandler}
+        <AddTaskModal
+          show={showModal}
+          hide={hideModalHandler}
+          setTaskName={handleTaskInput}
+          setTaskNotes={handleNotesInput}
+          taskName={editingTask ? taskName : null}
+          taskNotes={editingTask ? taskNotes : null}
+          saveTask={editingTask ? saveEditedTaskHandler : addTaskHandler}
+          title={editingTask ? "Edit Task" : "Add Task"}
         />
-      </React.Fragment>
-   
+        <SettingsModal
+          show={showSettings}
+          hide={hideModalHandler}
+        ></SettingsModal>
+      </Container>
+
+      <BottomNav
+        showAddTaskModal={showAddTaskModalHandler}
+        showSettingsModal={showSettingsModalHandler}
+        taskFilterChange={taskFilterChangeHandler}
+      />
+    </React.Fragment>
   );
 }
 

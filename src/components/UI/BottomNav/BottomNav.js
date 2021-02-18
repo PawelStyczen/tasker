@@ -1,5 +1,5 @@
-import React, {useContext} from "react";
-import {FilterDispatchContext} from "../../Tasker/Tasker"
+import React from "react";
+import { FilterDispatchContext } from "../../Tasker/Tasker";
 import { makeStyles } from "@material-ui/core/styles";
 import BottomNavigation from "@material-ui/core/BottomNavigation";
 import BottomNavigationAction from "@material-ui/core/BottomNavigationAction";
@@ -18,19 +18,16 @@ const useStyles = makeStyles({
   },
 });
 
-export default function BottomNav({ showAddTaskModal, showSettingsModal, taskFilterChange }) {
+export default function BottomNav({
+  showAddTaskModal,
+  showSettingsModal,
+  taskFilterChange,
+}) {
   // button styles////
   const classes = useStyles();
 
-
-  // CONTEXT////////////////////////
-  const filter = useContext(FilterDispatchContext);
-
-
-  // STATES /////////////////////
-  const [anchorEl, setAnchorEl] = React.useState(null);
-
   //MENU HANDLING/////////////////////
+  const [anchorEl, setAnchorEl] = React.useState(null);
   const handleOpenMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -39,11 +36,29 @@ export default function BottomNav({ showAddTaskModal, showSettingsModal, taskFil
     setAnchorEl(null);
   };
 
+  // FILTER CHANGE///////////////////////////////////
+  const [filterLabel, setFilterLabel] = React.useState("all tasks");
+  const handleFilterChange = (filter) => {
+    taskFilterChange(filter);
+    switch (filter) {
+      case "SHOW_ALL":
+        setFilterLabel("All tasks");
+      case "SHOW_COMPLETED":
+        setFilterLabel("Completed");
+      case "SHOW_PENDING":
+        setFilterLabel("Pending");
+      case "SHOW_IMPORTANT":
+        setFilterLabel("Important");
+    }
+    //Close menu
+    handleCloseMenu();
+  };
+
   ///////////////////////////
   return (
     <BottomNavigation showLabels className={classes.root}>
       <BottomNavigationAction
-        label="Sort"
+        label={filterLabel}
         icon={<RestoreIcon />}
         onClick={handleOpenMenu}
       />
@@ -67,9 +82,34 @@ export default function BottomNav({ showAddTaskModal, showSettingsModal, taskFil
         open={Boolean(anchorEl)}
         onClose={handleCloseMenu}
       >
-        <MenuItem onClick={() => {taskFilterChange("SHOW_PENDING"); handleCloseMenu()} }>Pending</MenuItem>
-        <MenuItem onClick={() => {taskFilterChange("SHOW_COMPLETED"); handleCloseMenu()} }>Completed</MenuItem>
-        <MenuItem onClick={handleCloseMenu}>Important</MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleFilterChange("SHOW_ALL");
+          }}
+        >
+          All tasks
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleFilterChange("SHOW_PENDING");
+          }}
+        >
+          Pending
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleFilterChange("SHOW_COMPLETED");
+          }}
+        >
+          Completed
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleFilterChange("SHOW_IMPORTANT");
+          }}
+        >
+          Important
+        </MenuItem>
       </Menu>
     </BottomNavigation>
   );
