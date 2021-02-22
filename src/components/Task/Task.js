@@ -11,7 +11,7 @@ import EditIcon from '@material-ui/icons/Edit';
 
 import { makeStyles } from "@material-ui/core/styles";
 
-export default function Task ({task, id, taskTekst, taskNotes, deleteTask, completeTask, showEditModal, editTask}) {
+export default function Task ({task, id, taskTekst, taskNotes, taskImportance, deleteTask, completeTask, showEditModal, editTask}) {
 
 
   //TASK STYLE////////
@@ -21,10 +21,15 @@ export default function Task ({task, id, taskTekst, taskNotes, deleteTask, compl
       marginTop: ".5rem",
       marginBottom: ".5rem",
       transition: "all .2s",
+      
     },
 
     taskCompleted: {
       backgroundColor: "grey",
+    },
+
+    taskImportant: {
+      backgroundColor: "gold !important",
     },
 
     //text styles
@@ -44,6 +49,7 @@ export default function Task ({task, id, taskTekst, taskNotes, deleteTask, compl
   const [checked, setChecked] = React.useState(false);
   const handleChange = (event) => {
     setChecked(event.target.checked);
+   
     setTimeout (() => {completeTask(task.id)}, 1000);
   };
 
@@ -55,18 +61,26 @@ const handleEditing = (id) => {
 }
 
 useEffect(() => {
-  console.log(task.completed)
   setChecked(task.completed)
+  
 }, )
 
+
+const checkTaskStatusStyling = () =>{
+  if(taskImportance){
+    return classes.taskImportant
+  }
+  if(task.completed){
+    return classes.taskCompleted
+  }
+
+}
 
   return (
     <Card
       variant="outlined"
       key={id}
-      className={
-        task.completed ? `${classes.root} ${classes.taskCompleted}` : classes.root
-      }
+      className={ `${classes.root} ${checkTaskStatusStyling()}`}
     >
       <CardActions>
         <Checkbox

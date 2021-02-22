@@ -14,10 +14,17 @@ import SettingsModal from "../UI/SettingsModal/SettingsModal";
 function reducer(tasks, action) {
   switch (action.type) {
     case "ADD_TASK":
-      return [...tasks, newTask(action.payload.name, action.payload.notes)];
+      return [...tasks, newTask(action.payload.name, action.payload.notes, action.payload.importance)];
     case "GET_FROM_FIREBASE":
       return [...tasks, { ...action.payload.task }];
-    // tasks: [action.payload.task, ...tasks]
+    case "CHANGE_IMPORTANCE":
+      return tasks.map((task) => {
+        if(task.id === action.payload.id) {
+          return {
+            ...task, importance: !task.importance 
+          }
+        }
+      })
 
     case "SAVE_EDITED_TASK":
       return tasks.map((task) => {
@@ -26,6 +33,7 @@ function reducer(tasks, action) {
             ...task,
             name: action.payload.name,
             notes: action.payload.notes,
+            importance: action.payload.importance
           };
         }
         return task;
@@ -44,8 +52,8 @@ function reducer(tasks, action) {
   }
 }
 
-function newTask(name, notes) {
-  return { id: Date.now(), name: name, completed: false, notes: notes };
+function newTask(name, notes, importance) {
+  return { id: Date.now(), name: name, completed: false, notes: notes, importance: importance};
 }
 
 
@@ -58,6 +66,8 @@ function filterTaskReducer(filteredTasks, action) {
       return [...action.payload.tasks.filter((task) => task.completed)];
     case "SHOW_PENDING":
       return [...action.payload.tasks.filter((task) => !task.completed)];
+    case "SHOW_IMPORTANT":
+      return [...action.payload.tasks.filter((task) => task.importance)]
   }
 }
 
@@ -82,6 +92,8 @@ function Tasker() {
 
 
 
+
+
   //TASK HANDLING////////////////////////////////////////////////////////////////////////////////////////////////
   //main task state
   const [tasks, dispatch] = useReducer(reducer, []);
@@ -98,6 +110,7 @@ function Tasker() {
       payload: {
         name: taskName,
         notes: taskNotes,
+        importance: importantTask
       },
     });
 
@@ -111,7 +124,9 @@ function Tasker() {
       payload: {
         name: taskName,
         notes: taskNotes,
+        importance: importantTask,
         id: editedTaskId,
+
       },
     });
     hideModalHandler();
@@ -138,6 +153,8 @@ function Tasker() {
     });
     console.log(id);
   };
+
+
 
   //FIREBASE///////////////////////////////////////////////////////////////////////////////////
   
@@ -213,14 +230,23 @@ function Tasker() {
     setTaskNotes(val.target.value);
   };
 
+  const [importantTask, setImportantTask] = React.useState(false);
+  const handleImportanceChange = (checked) => {
+  setImportantTask(checked)
+  }
+
   //TASK EDIT INPUT CONTROLS///////////
   const [editedTaskId, setEditedTaskId] = React.useState("");
   const editTaskHandler = (id) => {
     let editedTask = tasks.find((task) => task.id === id);
     setTaskName(editedTask.name);
     setTaskNotes(editedTask.notes);
+    
+    if(editingTask) {setImportantTask(editedTask.importance)} else {setImportantTask(false)}
     setEditedTaskId(id);
   };
+
+ 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
  
@@ -247,6 +273,7 @@ function Tasker() {
     
   };
 
+
   ////////////////////////////////////////////////////
   return (
     <React.Fragment>
@@ -259,6 +286,7 @@ function Tasker() {
                   id={task.id}
                   taskNotes={task.notes}
                   taskTekst={task.name}
+                  taskImportance={task.importance}
                   deleteTask={deleteTaskHandler}
                   completeTask={completeTaskHandler}
                   editTask={editTaskHandler}
@@ -277,10 +305,13 @@ function Tasker() {
           hide={hideModalHandler}
           setTaskName={handleTaskInput}
           setTaskNotes={handleNotesInput}
+          setImportantTask={handleImportanceChange}
+          importantTask={importantTask}
           taskName={editingTask ? taskName : null}
           taskNotes={editingTask ? taskNotes : null}
           saveTask={editingTask ? saveEditedTaskHandler : addTaskHandler}
           title={editingTask ? "Edit Task" : "Add Task"}
+          editTask={editingTask}
         />
         <SettingsModal
           show={showSettings}

@@ -47,9 +47,12 @@ export default function AddTaskModal({
   hide,
   setTaskName,
   setTaskNotes,
+  setImportantTask,
+  importantTask,
   taskName,
   taskNotes,
   saveTask,
+  editTask
 }) {
   //MODAL CONTROLS/////////
   const classes = useStyles();
@@ -57,13 +60,18 @@ export default function AddTaskModal({
 
   useEffect(() => {
     setOpen(show);
+    if(!editTask){setImportantTask(false)}
   }, [show]);
 
+
+
   //CHECKBOX CONTROLS//////
-  const [important, setImportant] = React.useState(false);
   const handleChange = (event) => {
-    setImportant(!important);
+    setImportantTask(event.target.checked);
+    //setImportantTask(false);
   };
+    
+  
 
   return (
     <div>
@@ -104,7 +112,8 @@ export default function AddTaskModal({
                 icon={<StarBorderIcon />}
                 checkedIcon={<StarIcon />}
                 onChange={handleChange}
-                name="important"
+                checked={importantTask}
+                name="checkedB"
                 color="primary"
               />
             }
