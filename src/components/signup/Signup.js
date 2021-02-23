@@ -62,13 +62,13 @@ export default function SignUp() {
   const nameRef = useRef();
   const lastNameRef = useRef();
   const passwordRef = useRef();
-  const emailRef = useRef("");
+  const emailRef = useRef();
 
   const [error, setError] = useState();
-  const [loading, setLoading] = useState("false");
+  const [loading, setLoading] = useState(false);
 
   const { signup } = useAuth();
-  const { history } = useHistory();
+  const history = useHistory();
  
   async function handleSubmit(e) {
     e.preventDefault();
@@ -78,7 +78,7 @@ export default function SignUp() {
       setLoading(true);
       
       await signup(emailRef.current.value, passwordRef.current.value)
-      history.push('/login')
+      history.push('/')
       
     } catch {
       setError("failed to create an account");

@@ -151,7 +151,7 @@ function Tasker() {
         id: id,
       },
     });
-    console.log(id);
+   
   };
 
 
@@ -169,8 +169,6 @@ function Tasker() {
   }, [tasks]);
 
   const addToFirebase = (tasks) => {
-    console.log("addToFirebase initialized");
-    console.log(currentUser.uid);
     db.ref(currentUser.uid).set(tasks, (err) => {
       if (err) console.log(err);
     });
@@ -182,7 +180,7 @@ function Tasker() {
       snapshot.forEach(function (childSnapshot) {
         // childData will be the actual contents of the child
         var childData = childSnapshot.val();
-        console.log(childData);
+        
         dispatch({
           type: "GET_FROM_FIREBASE",
           payload: {

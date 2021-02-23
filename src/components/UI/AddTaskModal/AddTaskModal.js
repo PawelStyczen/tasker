@@ -68,7 +68,7 @@ export default function AddTaskModal({
   //CHECKBOX CONTROLS//////
   const handleChange = (event) => {
     setImportantTask(event.target.checked);
-    //setImportantTask(false);
+    
   };
     
   

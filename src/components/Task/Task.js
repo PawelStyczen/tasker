@@ -36,7 +36,7 @@ export default function Task({
     },
 
     checkbox: {
-      marginLeft: "-100px",
+      marginLeft: "-10px",
     },
 
     //text styles
@@ -72,27 +72,20 @@ export default function Task({
     setChecked(task.completed);
   });
 
-  const checkTaskStatusStyling = () => {
-    if (taskImportance) {
-      return classes.taskImportant;
-    }
-    if (task.completed) {
-      return classes.taskCompleted;
-    }
-  };
+  
 
   return (
     <Card
       variant="outlined"
       key={id}
-      className={`${classes.root} ${checkTaskStatusStyling()}`}
+      className={classes.root}
     >
       <CardActions>
         <Checkbox
           checked={checked}
           onChange={handleChange}
           inputProps={{ "aria-label": "primary checkbox" }}
-          classes={classes.checkbox}
+          className={classes.checkbox}
         />
         <Typography variant="body1">
           <strong>{taskTekst}</strong>
