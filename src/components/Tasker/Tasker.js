@@ -207,6 +207,8 @@ function Tasker() {
       setEditingTask(false);
       setShowModal(true);
     }
+
+    
   };
 
   const showSettingsModalHandler = () => {

@@ -91,9 +91,7 @@ export default function Task({
   const handleChange = (event) => {
     setChecked(event.target.checked);
 
-    setTimeout(() => {
-      completeTask(task.id);
-    });
+    completeTask(task.id);
   };
 
   //TASK EDITING//////////////////
@@ -106,12 +104,26 @@ export default function Task({
     setChecked(task.completed);
   });
 
+  //TASK EXPANDING/////////////////////
+  const [taskExpand, setTaskExpand] = React.useState(false);
+  const handleTaskExpand = (e) => {
+    console.log("taskexpand");
+  };
+
   return (
-    <Card variant="outlined" key={id} className={classes.root}>
+    <Card
+      variant="outlined"
+      key={id}
+      className={classes.root}
+      onClick={handleTaskExpand}
+    >
       <CardActions className={classes.actions}>
         <Checkbox
           checked={checked}
           onChange={handleChange}
+          onClick={(event) => {
+            event.stopPropagation();
+          }}
           inputProps={{ "aria-label": "primary checkbox" }}
           className={`${classes.checkbox} ${classes.container}`}
         />
@@ -129,7 +141,8 @@ export default function Task({
         </div>
         <IconButton
           className={classes.deleteButton}
-          onClick={() => {
+          onClick={(event) => {
+            event.stopPropagation();
             handleEditing(task.id);
           }}
           aria-label="delete"
@@ -138,7 +151,8 @@ export default function Task({
         </IconButton>
         <IconButton
           className={classes.editButton}
-          onClick={() => {
+          onClick={(event) => {
+            event.stopPropagation();
             deleteTask(task.id);
           }}
           aria-label="delete"
