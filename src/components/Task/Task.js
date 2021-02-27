@@ -41,19 +41,16 @@ export default function Task({
     },
 
     actions: {
-      alignItems: "stretch",
-
-      //justifyItems: 'start'
-      margin: "auto",
-      //paddingTop: "10px"
+      justifyContent: 'start'
     },
 
     notes: {
       display: "-webkit-box",
       boxOrient: "vertical",
-      lineClamp: "4",
+      lineClamp: "2",
       overflow: "hidden",
-      //width: "50px",
+      
+      
       textOverflow: "ellipsis",
     },
 
@@ -65,7 +62,11 @@ export default function Task({
       marginLeft: "-10px",
       alignSelf: "start",
       transform: "translateY(3.5px)",
-      //margin: 'auto'
+     
+    },
+
+    taskText: {
+      minWidth: '0'
     },
 
     //text styles
@@ -75,16 +76,18 @@ export default function Task({
     },
 
     deleteButton: {
+      
       alignSelf: "start",
       marginLeft: "auto !important",
     },
 
     editButton: {
+    
       alignSelf: "start",
     },
   });
 
-  const classes = useStyles(taskImportance, task.completed);
+  
 
   //TASK INPUT  HANDLING///////////////
   const [checked, setChecked] = React.useState(false);
@@ -107,8 +110,12 @@ export default function Task({
   //TASK EXPANDING/////////////////////
   const [taskExpand, setTaskExpand] = React.useState(false);
   const handleTaskExpand = (e) => {
-    console.log("taskexpand");
+    console.log(taskExpand);
+    setTaskExpand(!taskExpand)
+
   };
+
+  const classes = useStyles(taskImportance, task.completed, taskExpand);
 
   return (
     <Card
@@ -127,7 +134,7 @@ export default function Task({
           inputProps={{ "aria-label": "primary checkbox" }}
           className={`${classes.checkbox} ${classes.container}`}
         />
-        <div className={classes.checkbox}>
+        <div className={classes.taskText}>
           <Typography variant="body2">
             <strong>{taskTekst}</strong>
             <br></br>
@@ -135,6 +142,7 @@ export default function Task({
           <Typography
             className={`${classes.notes} ${classes.container}`}
             variant="caption"
+           
           >
             {taskNotes}
           </Typography>
