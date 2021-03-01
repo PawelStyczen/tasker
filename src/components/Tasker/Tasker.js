@@ -100,7 +100,7 @@ function Tasker() {
   const useStyles = makeStyles({
     root: {
       paddingTop: "1rem",
-      background: "linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)",
+      background: "linear-gradient(45deg, #d50000 30%, #c8a600 90%)",
       minHeight: "95vh",
       overflow: "hidden",
       position: "relative",
