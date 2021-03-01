@@ -22,17 +22,17 @@ export default function Task({
   completeTask,
   showEditModal,
   editTask,
+  expandTask
 }) {
   //TASK STYLE////////
   const useStyles = makeStyles({
     //card styles
     root: {
-      //display: "flex",
+     
 
       marginTop: ".5rem",
       marginBottom: ".5rem",
-      transition: "all .2s",
-      //maxHeight: "90px",
+      
 
       borderLeft: taskImportance ? "10px solid gold" : "10px solid transparent",
 
@@ -41,21 +41,24 @@ export default function Task({
     },
 
     actions: {
-      justifyContent: 'start'
+      justifyContent: 'start',
+      
+      
     },
 
     notes: {
       display: "-webkit-box",
       boxOrient: "vertical",
-      lineClamp: "2",
+      lineClamp: task.expanded ? "" : "2",
       overflow: "hidden",
+      transition: 'all 0.8s',
       
-      
+      maxHeight: task.expanded ? '500px' : "40px",
       textOverflow: "ellipsis",
     },
 
     container: {
-      //flexGrow: '1'
+      
     },
 
     checkbox: {
@@ -66,7 +69,11 @@ export default function Task({
     },
 
     taskText: {
-      minWidth: '0'
+      minWidth: '0',
+     
+      overflow: 'hidden',
+      transition: 'all 0.8s'
+      
     },
 
     //text styles
@@ -110,19 +117,20 @@ export default function Task({
   //TASK EXPANDING/////////////////////
   const [taskExpand, setTaskExpand] = React.useState(false);
   const handleTaskExpand = (e) => {
-    console.log(taskExpand);
+    
     setTaskExpand(!taskExpand)
-
+    console.log(taskExpand)
+    console.log(task.expanded)
   };
 
-  const classes = useStyles(taskImportance, task.completed, taskExpand);
+  const classes = useStyles(taskImportance, task.completed, task.expanded);
 
   return (
     <Card
       variant="outlined"
       key={id}
       className={classes.root}
-      onClick={handleTaskExpand}
+      onClick={() => {expandTask(task.id)}}
     >
       <CardActions className={classes.actions}>
         <Checkbox

@@ -14,17 +14,25 @@ import SettingsModal from "../UI/SettingsModal/SettingsModal";
 function reducer(tasks, action) {
   switch (action.type) {
     case "ADD_TASK":
-      return [...tasks, newTask(action.payload.name, action.payload.notes, action.payload.importance)];
+      return [
+        ...tasks,
+        newTask(
+          action.payload.name,
+          action.payload.notes,
+          action.payload.importance
+        ),
+      ];
     case "GET_FROM_FIREBASE":
       return [...tasks, { ...action.payload.task }];
     case "CHANGE_IMPORTANCE":
       return tasks.map((task) => {
-        if(task.id === action.payload.id) {
+        if (task.id === action.payload.id) {
           return {
-            ...task, importance: !task.importance 
-          }
+            ...task,
+            importance: !task.importance,
+          };
         }
-      })
+      });
 
     case "SAVE_EDITED_TASK":
       return tasks.map((task) => {
@@ -33,7 +41,7 @@ function reducer(tasks, action) {
             ...task,
             name: action.payload.name,
             notes: action.payload.notes,
-            importance: action.payload.importance
+            importance: action.payload.importance,
           };
         }
         return task;
@@ -47,16 +55,32 @@ function reducer(tasks, action) {
         }
         return task;
       });
+
+    case "EXPAND_TASK":
+      return tasks.map((task) => {
+        if (task.id === action.payload.id) {
+          return { ...task, expanded: !task.expanded };
+        }
+        if (task.id !== action.payload.id) {
+          return { ...task, expanded: false}
+        }
+        return task;
+      });
     default:
       return tasks;
   }
 }
 
 function newTask(name, notes, importance) {
-  return { id: Date.now(), name: name, completed: false, notes: notes, importance: importance};
+  return {
+    id: Date.now(),
+    name: name,
+    completed: false,
+    notes: notes,
+    importance: importance,
+    expanded: false
+  };
 }
-
-
 
 function filterTaskReducer(filteredTasks, action) {
   switch (action.type) {
@@ -67,15 +91,9 @@ function filterTaskReducer(filteredTasks, action) {
     case "SHOW_PENDING":
       return [...action.payload.tasks.filter((task) => !task.completed)];
     case "SHOW_IMPORTANT":
-      return [...action.payload.tasks.filter((task) => task.importance)]
+      return [...action.payload.tasks.filter((task) => task.importance)];
   }
 }
-
-
-
-
-
-
 
 function Tasker() {
   //STYLING/////////////////////////////////////////////////////////////////////////////////////////////////
@@ -89,10 +107,6 @@ function Tasker() {
     },
   });
   const classes = useStyles();
-
-
-
-
 
   //TASK HANDLING////////////////////////////////////////////////////////////////////////////////////////////////
   //main task state
@@ -110,7 +124,7 @@ function Tasker() {
       payload: {
         name: taskName,
         notes: taskNotes,
-        importance: importantTask
+        importance: importantTask,
       },
     });
 
@@ -126,7 +140,6 @@ function Tasker() {
         notes: taskNotes,
         importance: importantTask,
         id: editedTaskId,
-
       },
     });
     hideModalHandler();
@@ -151,20 +164,32 @@ function Tasker() {
         id: id,
       },
     });
-   
   };
 
 
+  const expandTaskHandler = (id) => {
+    dispatch({
+      type: "EXPAND_TASK",
+      payload: {
+        id: id,
+      }
+    })
+  }
 
+
+  useEffect(() => {
+  console.log(tasks)
+   
+  })
   //FIREBASE///////////////////////////////////////////////////////////////////////////////////
-  
+
   useEffect(() => {
     getFromFirebase();
   }, []);
 
   useEffect(() => {
     if (firebaseDbInitialized) {
-      addToFirebase(tasks)
+      addToFirebase(tasks);
     }
   }, [tasks]);
 
@@ -180,7 +205,7 @@ function Tasker() {
       snapshot.forEach(function (childSnapshot) {
         // childData will be the actual contents of the child
         var childData = childSnapshot.val();
-        
+
         dispatch({
           type: "GET_FROM_FIREBASE",
           payload: {
@@ -191,7 +216,6 @@ function Tasker() {
     });
     setFirebaseDbInitialized(true);
   };
-  
 
   //MODAL CONTROLS///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -207,8 +231,6 @@ function Tasker() {
       setEditingTask(false);
       setShowModal(true);
     }
-
-    
   };
 
   const showSettingsModalHandler = () => {
@@ -232,8 +254,8 @@ function Tasker() {
 
   const [importantTask, setImportantTask] = React.useState(false);
   const handleImportanceChange = (checked) => {
-  setImportantTask(checked)
-  }
+    setImportantTask(checked);
+  };
 
   //TASK EDIT INPUT CONTROLS///////////
   const [editedTaskId, setEditedTaskId] = React.useState("");
@@ -241,15 +263,17 @@ function Tasker() {
     let editedTask = tasks.find((task) => task.id === id);
     setTaskName(editedTask.name);
     setTaskNotes(editedTask.notes);
-    
-    if(editingTask) {setImportantTask(editedTask.importance)} else {setImportantTask(false)}
+
+    if (editingTask) {
+      setImportantTask(editedTask.importance);
+    } else {
+      setImportantTask(false);
+    }
     setEditedTaskId(id);
   };
 
- 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
- 
   // FILTER LOGIC ///////////////////////////////////////////////////////
   const [filteredTasks, filter] = useReducer(filterTaskReducer, []);
   const [taskFilter, setTaskFilter] = React.useState("SHOW_ALL");
@@ -270,9 +294,7 @@ function Tasker() {
 
   const taskFilterChangeHandler = (newFilter) => {
     setTaskFilter(newFilter);
-    
   };
-
 
   ////////////////////////////////////////////////////
   return (
@@ -290,6 +312,7 @@ function Tasker() {
                   deleteTask={deleteTaskHandler}
                   completeTask={completeTaskHandler}
                   editTask={editTaskHandler}
+                  expandTask={expandTaskHandler}
                   saveEditedTask={saveEditedTaskHandler}
                   showEditModal={() => {
                     showAddTaskModalHandler("EDIT_TASK");
