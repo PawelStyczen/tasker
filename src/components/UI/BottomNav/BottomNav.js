@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import { FilterDispatchContext } from "../../Tasker/Tasker";
 import { makeStyles } from "@material-ui/core/styles";
 import BottomNavigation from "@material-ui/core/BottomNavigation";
@@ -34,6 +34,7 @@ export default function BottomNav({
 
   const handleCloseMenu = () => {
     setAnchorEl(null);
+    
   };
 
   // FILTER CHANGE///////////////////////////////////
@@ -43,16 +44,21 @@ export default function BottomNav({
     switch (filter) {
       case "SHOW_ALL":
         setFilterLabel("All tasks");
+        break;
       case "SHOW_COMPLETED":
         setFilterLabel("Completed");
+        break;
       case "SHOW_PENDING":
         setFilterLabel("Pending");
+        break;
       case "SHOW_IMPORTANT":
         setFilterLabel("Important");
+        break;
     }
     //Close menu
     handleCloseMenu();
   };
+
 
   ///////////////////////////
   return (

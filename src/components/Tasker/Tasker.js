@@ -100,7 +100,7 @@ function Tasker() {
   const useStyles = makeStyles({
     root: {
       paddingTop: "1rem",
-      background: "linear-gradient(45deg, #d50000 30%, #c8a600 90%)",
+      background: "linear-gradient(45deg, #ff5252 30%, #ff867f 90%)",
       minHeight: "95vh",
       overflow: "hidden",
       position: "relative",
@@ -176,11 +176,6 @@ function Tasker() {
     })
   }
 
-
-  useEffect(() => {
-  console.log(tasks)
-   
-  })
   //FIREBASE///////////////////////////////////////////////////////////////////////////////////
 
   useEffect(() => {
@@ -299,7 +294,7 @@ function Tasker() {
   ////////////////////////////////////////////////////
   return (
     <React.Fragment>
-      <Container className={classes.root} maxWidth="md">
+      <Container className={classes.root} maxWidth="xl">
         {firebaseDbInitialized
           ? filteredTasks.map((task) => {
               return (
